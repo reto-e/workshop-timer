@@ -1,0 +1,313 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Innoventa Timer</title>
+    <meta charset="utf-8">
+    <meta name="viewport" container="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        p {
+            text-align: center;
+            font-size: 60em;
+            margin-top: 0px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button {
+            background-color: #818587;
+            color: #000;
+            border: none;
+            font-size: 1.5em;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div class="w3-row">
+        <div id="agenda" class="w3-quarter w3-container w3-light-grey">
+            <div id="agenda_button" class="w3-row">
+                <div class="w3-container w3-twothird">
+                    <button class="w3-button w3-dark-grey" onclick="startWorkshop()">Start</button>
+                    <button class="w3-button w3-white" onclick="editMinutes()">edit</button>
+                    <br><br>
+                </div>
+                <div id="clock" class="w3-container w3-third"></div>
+            </div>
+
+            <!--dev textarea, verstecken in pop up fenster-->
+            <div id="edit_minutes" style="display:none;">
+                <textarea id="txt_minutes", rows="10",cols="35"></textarea>
+                <button id="btn_minutes class="w3-button w3-dark-grey" onclick="storeMinutesInLocalStorage()">Save</button>
+            </div>
+
+
+
+
+            <div id="minutesDiv"></div> <!-- the minutes are placed in here -->
+        </div>
+		
+		<audio id="myAudio">
+				<source src="gong.mp3" type="audio/mpeg">
+		</audio>
+		
+        <div id="timer" class="w3-threequarter w3-container w3-black">
+            <div class="w3-row">
+                <div class="w3-container">
+                    <button class="w3-button w3-dark-grey" onclick="setTime(5)">5</button>
+                    <button class="w3-button w3-dark-grey" onclick="setTime(6)">6</button>
+                    <button class="w3-button w3-dark-grey" onclick="setTime(8)">8</button>
+                    <button class="w3-button w3-dark-grey" onclick="setTime(10)">10</button>
+					<button class="w3-button w3-dark-grey" onclick="setTime(12)">12</button>
+					<button class="w3-button w3-dark-grey" onclick="setTime(15)">15</button>
+                    <button class="w3-button w3-dark-grey" onclick="setTime(30)">30</button>
+                </div>
+            </div>
+            <div class="w3-row">
+                <div id="donut" class="w3-container">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var timeLeft = 0;
+        var timePassed = 0;
+        var timeDonut; // timer for the donut chart
+        var timeMinutes; // timer for the minutes part
+        var currentDate; // containing the current dateTime, updated every second
+        var startTime; // timeobject for starttime of workshop
+        var minutes = []; // contains minutes
+
+
+        //-----------------------------------------------------------
+        //   read minutes from local storage
+        //-----------------------------------------------------------
+
+        var readMinutesFromLocalStorage = function() {
+            var minutes_raw = localStorage.getItem('minutes');
+
+            // parse lines
+            var lines = minutes_raw.split("\n");
+
+            for (i = 0; i < lines.length; i++) {
+                minutes[i] = {};
+                var elements = lines[i].split(",");
+                minutes[i].item = elements[0];
+                minutes[i].time = parseInt(elements[1], 10);
+                minutes[i].startTime = 0;
+                minutes[i].startTimeStr = "";
+                minutes[i].color = "lightgrey";
+            }
+
+        }
+
+        //-----------------------------------------------------------
+        //   store minutes in local storage (save button)
+        //-----------------------------------------------------------
+
+        var storeMinutesInLocalStorage = function() {
+            var ta = document.getElementById('txt_minutes');
+            localStorage.setItem('minutes', ta.value);
+            document.getElementById('edit_minutes').style = "display:none;";
+
+        }
+
+
+        //-----------------------------------------------------------
+        //   show edit textarea (edit button)
+        //-----------------------------------------------------------
+
+        var editMinutes = function() {
+            my_div = document.getElementById('edit_minutes');
+            my_div.style = "display:block;";
+            document.getElementById('txt_minutes').value = localStorage.getItem('minutes');
+
+        }
+
+
+        //-----------------------------------------------------------
+        //   drawing the chart
+        //-----------------------------------------------------------
+
+        var makeChart = function(data) {
+            // chart.js canva script
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'doughnut',
+
+                // The data for our dataset
+                data: {
+                    labels: ["passed", "to go"],
+                    datasets: [{
+                        backgroundColor: ['rgb(33, 33, 33)', 'rgb(25, 99, 132)', ],
+                        borderColor: ['rgb(33, 33, 33)', 'rgb(25, 99, 132)'],
+                        data: data,
+                    }]
+                },
+
+                // Configuration options go here
+                options: {
+                    animation: false
+                }
+            });
+        }
+
+        //-----------------------------------------------------------
+        //   updating the chart values
+        //-----------------------------------------------------------
+
+        var updateDonut = function() {
+            data = [timePassed, timeLeft];
+            makeChart(data);
+            // timeLeft eine Sekunde abziehen
+            timeLeft--;
+            // timePassed eine Sekunde hinzufuegen
+            timePassed++;
+
+             if (timeLeft < 0) { 
+				clearInterval(timeDonut); 
+				// play gong
+				myAudio.play();
+				}
+        }
+
+        //-----------------------------------------------------------
+        //   timer for the donut chart
+        //-----------------------------------------------------------
+
+        var setTime = function(value) {
+            // time in sekunden umrechnen
+            timeLeft = value * 60;
+            timePassed = 0;
+            clearInterval(timeDonut);
+            timeDonut = setInterval(updateDonut, 1000);
+        }
+
+
+        //-----------------------------------------------------------
+        //   update the agenda clock and color of minutes
+        //-----------------------------------------------------------
+
+        // create current time to display
+        var updateMinutes = function() {
+            currentDate = new Date();
+            var mins = 0;
+            if (currentDate.getMinutes() < 10) {
+                mins = '0' + currentDate.getMinutes();
+            }
+            else {
+                mins = currentDate.getMinutes();
+            }
+            var displayTime = currentDate.getHours() + ":" + mins;
+            document.getElementById("clock").textContent = displayTime;
+			
+			// compare current time with item time to change color
+			for (var i = 0; i < minutes.length; i++) {
+				if(minutes[i].startTime != "" && minutes[i].startTime <= currentDate) {
+					minutes[i].color = "green";
+				}
+			}
+			renderMinutes();
+			//console.log("rendering minutes");
+        }
+		
+		 //-----------------------------------------------------------
+        //   render the minutes block
+        //-----------------------------------------------------------
+		
+		var renderMinutes = function() {
+			// create Minutes
+            var minutesDiv = document.getElementById("minutesDiv");
+
+            // empty minutesDiv
+            minutesDiv.innerHTML =" ";
+
+            for (var i = 0; i < minutes.length; i++) {
+				minutesDiv.innerHTML += 
+				`<div class="w3-row">
+					<div class="w3-container">
+						<div class="w3-col" style="width: 10%; color: ${minutes[i].color}; font-size: 1.2em; "><strong>&#8226;</strong></div>
+						<div class="w3-col" style="width: 50%;">${minutes[i].item}</div>
+						<div class="w3-col" style="width: 20%;">${minutes[i].time}</div>
+						<div class="w3-col" style="width: 20%;">${minutes[i].startTimeStr}</div>
+					</div>
+				</div>
+				<br>`
+			}
+		}
+
+        var displayMinutes = function() {
+            // read in minutes from file
+            var minutes = readMinutesFromLocalStorage();
+
+            // start loop for displaying current time
+            timeMinutes = setInterval(updateMinutes, 1000);
+			
+			renderMinutes();
+			
+        }
+        window.onload = displayMinutes();
+        
+        //-----------------------------------------------------------
+        //   start workshop, when user clicks on start button
+        //-----------------------------------------------------------
+        
+        var startWorkshop = function() {
+            // get current time and store it to top variable
+            startTime = new Date();
+
+            // set start-time for first element
+            minutes[0].startTime = startTime;
+
+            var mins = 0;
+            if(startTime.getMinutes() < 10) {
+                mins = '0' + startTime.getMinutes();
+            }
+            else {
+                mins = startTime.getMinutes();
+            }
+
+            minutes[0].startTimeStr = startTime.getHours() + ":" + mins;
+
+            // calculate start-time for each minutes-item, beginning from second. 
+			var minutes_passed = 0;
+            for (var i = 1; i < minutes.length; i++) {
+				minutes_passed = minutes_passed + minutes[i-1].time;
+                var itemTime = new Date();
+                itemTime.setTime(currentDate.getTime() + (minutes_passed * 60 * 1000));
+                var mins = 0;
+                if (itemTime.getMinutes() < 10) {
+                    mins = '0' + itemTime.getMinutes();
+                }
+                else {
+                    mins = itemTime.getMinutes();
+                }
+                var itemTimeStr = itemTime.getHours() + ":" + mins;
+                
+                // diesen String nun in das richtige Element eintragen.
+                minutes[i].startTime = itemTime;        // used for calculating the color of the item
+                minutes[i].startTimeStr = itemTimeStr;    // used for displaying in the browser
+                
+            }
+            renderMinutes();
+        }
+
+         
+
+    </script>
+
+</body>
+
+</html>
