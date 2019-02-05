@@ -25,6 +25,5 @@ The nice charts come from [chart.js](https://www.chartjs.org/)
 The gong used in thes example is the alien spaceship UFO Sound from [soundbible](http://soundbible.com/2213-Alien-Spaceship-UFO.html)
 
 ## Known issues
-* After a change of the minutes you have to reload the page (e.g. with F5) to see the changes
 * Since the the minutes are stored in the local storage, they are bound to one computer and cannot be easily shared. This is done on purpose, though, because like this I do not need to run a server with user authentication and so on.
 * The workshop-timer does not appear to behave very cooperative with Safari browser... 
