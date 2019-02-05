@@ -43,7 +43,7 @@
                 <div id="clock" class="w3-container w3-third"></div>
             </div>
 
-            <!--dev textarea, verstecken in pop up fenster-->
+            
             <div id="edit_minutes" style="display:none;">
                 <textarea id="txt_minutes", rows="10",cols="35"></textarea>
                 <button id="btn_minutes class="w3-button w3-dark-grey" onclick="storeMinutesInLocalStorage()">Save</button>
@@ -120,6 +120,12 @@
             var ta = document.getElementById('txt_minutes');
             localStorage.setItem('minutes', ta.value);
             document.getElementById('edit_minutes').style = "display:none;";
+            
+            // reload minutes
+            readMinutesFromLocalStorage();
+            
+            // redraw minutes
+            renderMinutes();
 
         }
 
@@ -238,7 +244,7 @@
 				minutesDiv.innerHTML += 
 				`<div class="w3-row">
 					<div class="w3-container">
-						<div class="w3-col" style="width: 10%; color: ${minutes[i].color}; font-size: 1.2em; "><strong>&#8226;</strong></div>
+						<div class="w3-col" style="width: 10%; color: ${minutes[i].color}; font-size: 1.4em; "><strong>&#8226;</strong></div>
 						<div class="w3-col" style="width: 50%;">${minutes[i].item}</div>
 						<div class="w3-col" style="width: 20%;">${minutes[i].time}</div>
 						<div class="w3-col" style="width: 20%;">${minutes[i].startTimeStr}</div>
