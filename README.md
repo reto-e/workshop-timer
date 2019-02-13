@@ -1,4 +1,6 @@
 # workshop-timer
+![workshop-timer](running_timer.png)
+
 ## What does it do?
 Well, it times your workshop. There are two main panels on the page: The planned minutes of the workshop are on the left hand side. On the right hand side there is a timer you can use to time different activities of your workshop.
 
@@ -18,6 +20,7 @@ Collect aspects of the problem,15
 ```
 
 Save this entries. The entries will get stored to your local storage. I.e. they are available only on the computer where you edited the entries. To share the minutes among different computers you need to copy-paste your minutes and store them again on other computers.
+![edit minutes](edit_timer.png)
 
 ## Used Components
 The css is from [w3-css](https://www.w3schools.com/w3css/default.asp).
