@@ -26,6 +26,13 @@
             border: none;
             font-size: 1.5em;
         }
+		
+		#pauseButton {
+			position:absolute;
+			z-index:1;
+			left:61%;
+			top:40%;
+		}
 
     </style>
 
@@ -43,14 +50,10 @@
                 <div id="clock" class="w3-container w3-third"></div>
             </div>
 
-            
             <div id="edit_minutes" style="display:none;">
                 <textarea id="txt_minutes", rows="10",cols="35"></textarea>
                 <button id="btn_minutes class="w3-button w3-dark-grey" onclick="storeMinutesInLocalStorage()">Save</button>
             </div>
-
-
-
 
             <div id="minutesDiv"></div> <!-- the minutes are placed in here -->
         </div>
@@ -79,6 +82,13 @@
                     <canvas id="myChart"></canvas>
                 </div>
             </div>
+			
+			<div id="pauseButtonDiv">
+				<button id="pauseButton" class="w3-button w3-dark-grey" onclick="toggleTime()">||</button>
+			</div>
+			
+			
+			
         </div>
     </div>
 
@@ -86,6 +96,7 @@
     <script>
         var timeLeft = 0;
         var timePassed = 0;
+		var isCountdownRunning = false; // check if countdown is running for toggle function
         var timeDonut; // timer for the donut chart
         var timeMinutes; // timer for the minutes part
         var currentDate; // containing the current dateTime, updated every second
@@ -160,8 +171,8 @@
                 data: {
                     labels: ["passed", "to go"],
                     datasets: [{
-                        backgroundColor: ['rgb(33, 33, 33)', 'rgb(25, 99, 132)', ],
-                        borderColor: ['rgb(33, 33, 33)', 'rgb(25, 99, 132)'],
+                        backgroundColor: ['rgb(33, 33, 33)', 'rgb(255, 153, 0)', ],
+                        borderColor: ['rgb(33, 33, 33)', 'rgb(255, 153, 0)'],
                         data: data,
                     }]
                 },
@@ -191,7 +202,39 @@
 				myAudio.play();
 				}
         }
+		
+		// TODO: finish this stuff
+		//-----------------------------------------------------------
+        //   toggle donut timer
+		//-----------------------------------------------------------
+		
+		var toggleTime = function() {
+			btn = document.getElementById("pauseButton");
+			
+			if(isCountdownRunning) {
+				// stop timer
+				clearInterval(timeDonut);
+				// set button text to arrow
+				btn.textContent=">";
+				
+				isCountdownRunning = false;
+			}
+			
+			else {
+				// resume timer
+				timeDonut = setInterval(updateDonut, 1000);
+				// set button text to pause
+				btn.textContent="||";
+				
+				isCountdownRunning = true;
+			}
+			
+		}
 
+		
+		// ------------- new stuff till here ---------------------------------
+		
+				
         //-----------------------------------------------------------
         //   timer for the donut chart
         //-----------------------------------------------------------
@@ -202,9 +245,10 @@
             timePassed = 0;
             clearInterval(timeDonut);
             timeDonut = setInterval(updateDonut, 1000);
+			isCountdownRunning = true;
         }
-
-
+		
+		
         //-----------------------------------------------------------
         //   update the agenda clock and color of minutes
         //-----------------------------------------------------------
